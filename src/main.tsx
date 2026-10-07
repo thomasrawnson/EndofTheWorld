@@ -371,46 +371,63 @@ function App() {
           </div>
         </aside>
       </main>
-      <footer>
-        <div>
-          <span className="instruction">
+      <footer className="action-dock">
+        <div className="action-dock__guidance">
+          <span className="action-dock__label">CURRENT STEP</span>
+
+          <strong className="action-dock__instruction">
             {target
-              ? `Choose a square for ${RESIDENTS[target].name} — ${target === "traveller" ? "costs 1 integrity" : "costs 1 supply"}.`
+              ? `Choose a square for ${RESIDENTS[target].name}`
               : g.phase === "choice"
-                ? "Choose the incident we are best equipped to regret."
+                ? "Choose one incident to survive"
                 : g.phase === "actions"
-                  ? "Use your residents, repair the shelter, or end the round."
+                  ? "Use abilities or repairs, then end the round"
                   : g.phase === "recruitment"
-                    ? "Recruitment paperwork is mandatory. Hiring is not."
-                    : "Review the shelter’s official findings."}
-          </span>
+                    ? "Choose whether to recruit a new resident"
+                    : "Review the shelter report"}
+          </strong>
+
           {target && (
-            <button onClick={() => setTarget(null)}>CANCEL — NO COST</button>
+            <button
+              className="action-dock__cancel"
+              onClick={() => setTarget(null)}
+            >
+              CANCEL — NO COST
+            </button>
           )}
         </div>
+
         {g.phase === "actions" && (
-          <div className={"upkeep " + (short ? "shortfall" : "")}>
-            <span
-              title={`Base ${bill.base}${bill.influencer ? " + Influencer 1" : ""} = ${bill.total} supplies`}
-            >
-              TONIGHT <b>{bill.total}</b> SUPPLIES
-            </span>
-            <span>
-              End round:{" "}
-              <b>
-                {afterS} supplies • {afterI}/5 integrity
-              </b>
+          <div className={"round-action " + (short ? "shortfall" : "")}>
+            <div className="round-action__summary">
+              <span className="round-action__eyebrow">TONIGHT'S UPKEEP</span>
+
+              <strong>{bill.total} supplies</strong>
+
+              <span>
+                After upkeep: {afterS} supplies · {afterI}/5 integrity
+              </span>
+
               {short > 0 && (
                 <em>
-                  Short by {short} supplies — lose {short} integrity.
+                  Short by {short} — shelter loses {short} integrity
                 </em>
               )}
-            </span>
+            </div>
+
             <button
-              className={afterI === 0 ? "lethal-action" : ""}
+              className={
+                "end-round-button " + (afterI === 0 ? "lethal-action" : "")
+              }
               onClick={() => update(payUpkeep(g))}
             >
-              {afterI === 0 ? "LETHAL — END ROUND" : "END ROUND →"}
+              <span className="end-round-button__small">
+                {afterI === 0 ? "WARNING — THIS WILL END THE RUN" : "READY?"}
+              </span>
+
+              <span className="end-round-button__main">
+                {afterI === 0 ? "END ROUND — SHELTER LOST" : "END ROUND →"}
+              </span>
             </button>
           </div>
         )}
@@ -501,24 +518,39 @@ function App() {
             <span className={"big-stamp " + g.outcome}>
               {g.outcome === "win" ? "SHELTER CERTIFIED" : "SHELTER CONDEMNED"}
             </span>
+
             <h2>
               {g.outcome === "win"
                 ? "Civilisation remains technically operational."
                 : "The apocalypse has won on a technicality."}
             </h2>
+
             <p>
               {g.round} rounds survived · {g.claimed.length}/10 lines completed
             </p>
+
             <p>
               Residents: {g.residents.map((x) => RESIDENTS[x].name).join(", ")}
             </p>
+
             <blockquote>
               {g.outcome === "win"
                 ? "Evaluation: Adequate snacks, exemplary stamping."
                 : "Evaluation: Structural optimism exceeded load-bearing limits."}
             </blockquote>
+
+            <ShareResult
+              won={g.outcome === "win"}
+              roundsSurvived={g.round}
+              residentsAlive={g.residents.length}
+              totalResidents={3}
+              bingoLines={g.claimed.length}
+              integrity={g.integrity * 20}
+            />
+
             <div>
               <button onClick={() => reset(true)}>RETRY SAME RUN</button>
+
               <button onClick={() => reset(false)}>NEW RUN</button>
             </div>
           </div>
